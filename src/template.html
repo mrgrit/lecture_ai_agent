@@ -1,0 +1,425 @@
+<title>AI 에이전트 엔지니어링</title>
+<style>
+  :root {
+    --bg: #F6F7F9;
+    --surface: #FFFFFF;
+    --surface-2: #EEF1F5;
+    --ink: #1C2433;
+    --muted: #5A6478;
+    --line: #DDE2EA;
+    --accent: #33549C;
+    --accent-soft: #E3EAF7;
+    --m1: #0F7E72;  --m1-soft: #E0F1EF;
+    --m2: #3A5FBF;  --m2-soft: #E4EAF9;
+    --m3: #B26A00;  --m3-soft: #F7EDDD;
+    --m4: #7A4FB3;  --m4-soft: #EFE7F8;
+    --code-bg: #F0F2F6;
+    --line-strong: #B9C2D0;
+    --on-accent: #FFFFFF;
+    --ok: #1F7A4D;       --ok-soft: #E2F1E8;
+    --warn: #B2531B;     --warn-soft: #F8EAE0;
+    --danger: #B3261E;
+    --src: #7A6A2F;      --src-soft: #F4EFDC;
+    --shadow: 0 1px 3px rgba(28,36,51,.08), 0 8px 24px rgba(28,36,51,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151C;
+      --surface: #1A1F29;
+      --surface-2: #222835;
+      --ink: #E8EBF2;
+      --muted: #9AA3B5;
+      --line: #2A3140;
+      --accent: #7FA3E8;
+      --accent-soft: #24304A;
+      --m1: #4CC2B4;  --m1-soft: #16332F;
+      --m2: #86A5EF;  --m2-soft: #1F2A45;
+      --m3: #E0A34E;  --m3-soft: #38290F;
+      --m4: #B79AE8;  --m4-soft: #2C2140;
+      --code-bg: #10131A;
+      --line-strong: #3C4557;
+      --on-accent: #10131A;
+      --ok: #4FB37C;       --ok-soft: #17301F;
+      --warn: #DB8B4A;     --warn-soft: #33220F;
+      --danger: #E8705F;
+      --src: #C7B36A;      --src-soft: #2E2814;
+      --shadow: 0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151C;
+    --surface: #1A1F29;
+    --surface-2: #222835;
+    --ink: #E8EBF2;
+    --muted: #9AA3B5;
+    --line: #2A3140;
+    --accent: #7FA3E8;
+    --accent-soft: #24304A;
+    --m1: #4CC2B4;  --m1-soft: #16332F;
+    --m2: #86A5EF;  --m2-soft: #1F2A45;
+    --m3: #E0A34E;  --m3-soft: #38290F;
+    --m4: #B79AE8;  --m4-soft: #2C2140;
+    --code-bg: #10131A;
+    --line-strong: #3C4557;
+    --on-accent: #10131A;
+    --ok: #4FB37C;     --ok-soft: #17301F;
+    --warn: #DB8B4A;     --warn-soft: #33220F;
+    --danger: #E8705F;
+    --src: #C7B36A;    --src-soft: #2E2814;
+    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation: none !important; transition: none !important; }
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Pretendard Variable", Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  .serif { font-family: "Noto Serif KR", "Nanum Myeongjo", "Apple SD Gothic Neo", Georgia, serif; }
+  code, pre, .mono {
+    font-family: "JetBrains Mono", "D2Coding", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  /* ---------- layout ---------- */
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+  .shell { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 48px; align-items: start; }
+  main { min-width: 0; max-width: 780px; }
+  @media (max-width: 1023px) {
+    .shell { display: block; }
+    #toc { display: none; }
+  }
+
+  /* ---------- header ---------- */
+  header.course {
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+    padding: 56px 0 40px;
+  }
+  .eyebrow {
+    font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; margin: 0 0 14px;
+  }
+  h1.course-title {
+    font-size: clamp(30px, 5vw, 46px);
+    line-height: 1.25; margin: 0 0 16px; font-weight: 900;
+    text-wrap: balance;
+  }
+  .lede { font-size: 18px; color: var(--muted); max-width: 640px; margin: 0; }
+  .src-note {
+    margin-top: 22px; font-size: 13.5px; color: var(--muted);
+    border-left: 3px solid var(--line); padding-left: 14px; max-width: 640px;
+  }
+  .src-note a { color: var(--accent); }
+
+  /* ---------- TOC sidebar ---------- */
+  #toc {
+    position: sticky; top: 24px;
+    padding: 20px 0 40px;
+    font-size: 13.5px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+  }
+  #toc .toc-mod { margin-bottom: 18px; }
+  #toc .toc-mod-title {
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 700; color: var(--ink); text-decoration: none;
+    padding: 4px 0; line-height: 1.4;
+  }
+  #toc .dot { width: 9px; height: 9px; border-radius: 2px; flex: none; background: var(--mc); }
+  #toc ol { list-style: none; margin: 4px 0 0; padding: 0 0 0 17px; border-left: 1px solid var(--line); }
+  #toc ol a {
+    display: block; color: var(--muted); text-decoration: none;
+    padding: 2.5px 0 2.5px 10px; margin-left: -1px; border-left: 2px solid transparent;
+    line-height: 1.45;
+  }
+  #toc ol a:hover { color: var(--ink); }
+  #toc ol a.active { color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+  #toc > a.top-link { display: block; color: var(--muted); text-decoration: none; font-weight: 600; margin-bottom: 14px; }
+
+  /* ---------- curriculum map ---------- */
+  .map { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin: 28px 0 0; }
+  .map a.card {
+    display: block; text-decoration: none; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 20px 20px 16px; box-shadow: var(--shadow);
+    border-top: 4px solid var(--mc, var(--accent));
+  }
+  .map a.card:hover { border-color: var(--mc, var(--accent)); }
+  .map .mod-no { font-size: 12px; letter-spacing: .14em; font-weight: 700; color: var(--mc); }
+  .map h3 { margin: 6px 0 8px; font-size: 17.5px; line-height: 1.35; }
+  .map p { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+
+  /* ---------- module chapters ---------- */
+  section.module { padding: 64px 0 8px; }
+  .mod-head { border-bottom: 2px solid var(--mc); padding-bottom: 18px; margin-bottom: 8px; }
+  .mod-chip {
+    display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .14em;
+    color: var(--mc); background: var(--mc-soft); border-radius: 999px;
+    padding: 4px 12px; margin-bottom: 12px;
+  }
+  h2.mod-title { font-size: clamp(24px, 3.6vw, 34px); margin: 0 0 10px; font-weight: 900; line-height: 1.3; text-wrap: balance; }
+  .mod-lede { color: var(--muted); font-size: 16.5px; margin: 0; max-width: 640px; }
+  .mod-src { font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .mod-src a { color: var(--mc); }
+
+  /* objectives */
+  .objectives {
+    background: var(--mc-soft); border-radius: 10px; padding: 18px 22px; margin: 26px 0 8px;
+  }
+  .objectives h3 { margin: 0 0 8px; font-size: 14px; letter-spacing: .08em; color: var(--mc); }
+  .objectives ul { margin: 0; padding-left: 20px; }
+  .objectives li { margin: 4px 0; font-size: 15px; }
+
+  /* lessons */
+  h3.lesson {
+    font-size: 21.5px; font-weight: 800; margin: 44px 0 12px; line-height: 1.4;
+    display: flex; gap: 12px; align-items: baseline;
+  }
+  h3.lesson .no { color: var(--mc); font-weight: 900; flex: none; }
+  h4 { font-size: 16.5px; margin: 26px 0 8px; }
+  p { margin: 0 0 14px; }
+  main ul, main ol { margin: 0 0 14px; padding-left: 24px; }
+  main li { margin: 3px 0; }
+  main a { color: var(--accent); }
+  strong { font-weight: 700; }
+  .callout {
+    background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--mc);
+    border-radius: 8px; padding: 14px 18px; margin: 18px 0; font-size: 15px;
+  }
+  .callout .t { font-weight: 700; color: var(--mc); margin-right: 6px; }
+  code {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px;
+    padding: 1.5px 6px; font-size: 13.5px;
+  }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 18px; overflow-x: auto; margin: 16px 0; line-height: 1.6;
+  }
+  pre code { background: none; border: none; padding: 0; font-size: 13px; }
+
+  /* tables */
+  .tbl-wrap { overflow-x: auto; margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+  th, td { border: 1px solid var(--line); padding: 8px 14px; text-align: left; vertical-align: top; }
+  th { background: var(--surface-2); font-size: 13.5px; white-space: nowrap; }
+
+  /* figures */
+  figure.diagram {
+    margin: 26px 0; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 22px 22px 14px; box-shadow: var(--shadow);
+  }
+  figure.diagram .fig-scroll { overflow-x: auto; }
+  figure.diagram svg { display: block; max-width: 100%; height: auto; margin: 0 auto; color: var(--ink); }
+  figure.diagram figcaption {
+    margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.6;
+    border-top: 1px dashed var(--line); padding-top: 10px;
+  }
+  figure.diagram figcaption .fig-no { font-weight: 700; color: var(--mc); }
+
+  /* quiz */
+  .quiz details {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    padding: 0; margin: 10px 0;
+  }
+  .quiz summary {
+    cursor: pointer; padding: 12px 18px; font-weight: 600; font-size: 15px;
+    list-style: none; display: flex; gap: 10px;
+  }
+  .quiz summary::before { content: "Q."; color: var(--mc); font-weight: 800; flex: none; }
+  .quiz summary::marker { content: ""; }
+  .quiz details[open] summary { border-bottom: 1px solid var(--line); }
+  .quiz .answer { padding: 12px 18px 14px 44px; font-size: 14.5px; color: var(--ink); }
+  .quiz .answer::before { content: "답 · "; color: var(--mc); font-weight: 700; }
+
+  /* exercises */
+  .exercise {
+    background: var(--surface); border: 1px dashed var(--mc); border-radius: 10px;
+    padding: 16px 20px; margin: 14px 0;
+  }
+  .exercise .ex-no { font-size: 12.5px; font-weight: 700; letter-spacing: .1em; color: var(--mc); }
+  .exercise h4 { margin: 4px 0 8px; }
+  .exercise p, .exercise li { font-size: 14.5px; }
+
+  hr.mod-end { border: none; border-top: 1px solid var(--line); margin: 56px 0 0; }
+
+  footer.course {
+    border-top: 1px solid var(--line); margin-top: 72px; padding: 32px 0 48px;
+    font-size: 13.5px; color: var(--muted); background: var(--surface);
+  }
+  footer.course a { color: var(--accent); }
+  footer.course p { margin: 0 0 8px; max-width: 720px; }
+
+  /* ---------- diagram primitives ---------- */
+  svg.dia { color: var(--ink); }
+  svg.dia text { fill: currentColor; }
+  .d-t { fill: currentColor; }
+  .d-dim { opacity: .68; }
+  .d-acc { fill: var(--mc); opacity: 1; }
+  .d-bad { fill: var(--danger); opacity: 1; }
+  .d-mono { fill: currentColor; font-family: "JetBrains Mono", "D2Coding", ui-monospace, Menlo, monospace; opacity: .85; }
+  .d-halo { paint-order: stroke; stroke: var(--surface); stroke-width: 3.5px; stroke-linejoin: round; }
+
+  .d-box   { fill: var(--surface-2); stroke: var(--line-strong); stroke-width: 1.2; }
+  .d-panel { fill: var(--surface-2); stroke: var(--line-strong); stroke-width: 1.2; }
+  .d-panel-2 { fill: var(--bg); stroke: var(--line-strong); stroke-width: 1.2; }
+  .d-accent { fill: var(--mc-soft); stroke: var(--mc); stroke-width: 1.3; }
+  .d-strong { fill: var(--mc-soft); stroke: var(--mc); stroke-width: 2.2; }
+  .d-ok    { fill: var(--ok-soft); stroke: var(--ok); stroke-width: 1.4; }
+  .d-warn  { fill: var(--warn-soft); stroke: var(--warn); stroke-width: 1.4; }
+  .d-warn-p{ fill: var(--warn-soft); stroke: var(--warn); stroke-width: 1.2; }
+  .d-src   { fill: var(--src-soft); stroke: var(--src); stroke-width: 1.2; }
+  .d-anchor{ fill: var(--surface-2); stroke: var(--ink); stroke-width: 2; stroke-dasharray: 3 3; }
+
+  .d-line  { stroke: currentColor; stroke-width: 1.5; opacity: .5; fill: none; }
+  .d-line-a{ stroke: var(--mc); stroke-width: 2; fill: none; }
+  .d-edge  { stroke: currentColor; stroke-width: 1.3; opacity: .45; }
+  .d-edge-dim { stroke: currentColor; stroke-width: 1; opacity: .2; }
+  .d-rule  { stroke: currentColor; stroke-width: 1; opacity: .22; }
+  .d-axis  { stroke: currentColor; stroke-width: 1.4; opacity: .45; }
+  .d-grid  { stroke: currentColor; stroke-width: 1; opacity: .13; }
+  .d-arrowhead   { fill: currentColor; opacity: .5; }
+  .d-arrowhead-a { fill: var(--mc); }
+  .d-gate  { fill: var(--mc); }
+  .d-dot   { fill: currentColor; opacity: .55; }
+  .d-dot-a { fill: var(--mc); }
+  .d-ok-s  { stroke: var(--ok); stroke-width: 2.4; stroke-linecap: round; fill: none; }
+  .d-bad-s { stroke: var(--danger); stroke-width: 2.2; stroke-linecap: round; }
+
+  .d-node    { fill: var(--surface-2); stroke: var(--line-strong); stroke-width: 1.2; }
+  .d-node-a  { fill: var(--mc-soft); stroke: var(--mc); stroke-width: 1.6; }
+  .d-node-w  { fill: var(--warn-soft); stroke: var(--warn); stroke-width: 1.4; }
+  .d-node-dim{ fill: var(--surface-2); stroke: currentColor; stroke-width: 1; opacity: .38; }
+  .d-src-n   { fill: var(--src-soft); stroke: var(--src); stroke-width: 1.2; }
+
+  .d-chip    { fill: var(--surface-2); stroke: var(--line-strong); stroke-width: 1; }
+  .d-chip-t  { fill: currentColor; opacity: .8; }
+  .d-chip-a  { fill: var(--mc-soft); stroke: var(--mc); stroke-width: 1.1; }
+  .d-chip-a-t{ fill: var(--mc); }
+  .d-chip-w  { fill: var(--warn-soft); stroke: var(--warn); stroke-width: 1.1; }
+  .d-chip-w-t{ fill: var(--warn); }
+  .d-numchip { fill: var(--mc); }
+  .d-numchip-t { fill: var(--on-accent); }
+  .d-banner  { fill: var(--mc); }
+  .d-banner-t{ fill: var(--on-accent); }
+
+  .d-own-tool { fill: var(--mc-soft); stroke: var(--mc); stroke-width: 1.2; }
+  .d-own-plat { fill: var(--warn-soft); stroke: var(--warn); stroke-width: 1.2; }
+  .d-own-repo { fill: var(--src-soft); stroke: var(--src); stroke-width: 1.2; }
+
+  .d-tog-on  { fill: var(--mc); }
+  .d-tog-off { fill: var(--line-strong); }
+  .d-tog-knob{ fill: var(--surface); }
+
+  figure.diagram .fig-src { display: block; margin-top: 3px; opacity: .78; font-size: 12px; }
+  figure.diagram .fig-src code { font-size: 11.5px; background: none; border: none; padding: 0; }
+
+  .m1 { --mc: var(--m1); --mc-soft: var(--m1-soft); }
+  .m2 { --mc: var(--m2); --mc-soft: var(--m2-soft); }
+  .m3 { --mc: var(--m3); --mc-soft: var(--m3-soft); }
+  .m4 { --mc: var(--m4); --mc-soft: var(--m4-soft); }
+
+  a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px;
+  }
+</style>
+
+<header class="course">
+  <div class="wrap">
+    <p class="eyebrow">AI Agent Engineering · 한국어 강좌</p>
+    <h1 class="course-title serif">AI 에이전트 엔지니어링</h1>
+    <p class="lede">
+      스킬과 커넥터로 에이전트에게 능력을 주고, 하니스로 작업 환경을 설계하고,
+      루프로 스스로 움직이게 만들고, 그래프로 기억을 구조화한다.
+      AI 에이전트를 실무 수준으로 다루기 위한 4개 모듈 강좌다.
+    </p>
+    <div class="src-note">
+      본 강좌는 Panaversity <em>Agent Factory</em>의 공개 문서 4편
+      (<a href="https://agentfactory.panaversity.org/docs/skills-connectors-crash-course" target="_blank" rel="noopener">Skills &amp; Connectors</a>,
+      <a href="https://agentfactory.panaversity.org/docs/harness-engineering-crash-course" target="_blank" rel="noopener">Harness Engineering</a>,
+      <a href="https://agentfactory.panaversity.org/docs/loop-engineering-crash-course" target="_blank" rel="noopener">Loop Engineering</a>,
+      <a href="https://agentfactory.panaversity.org/docs/graph-engineering-crash-course" target="_blank" rel="noopener">Graph Engineering</a>)의
+      내용을 학습 목적으로 한국어로 요약·재구성한 것이다. 그림은 원본을 복제하지 않고 동일한 개념을 한국어로 다시 그렸으며,
+      각 그림 설명에 원본 도판 이름을 병기했다. 원문과 원본 도판은 위 링크에서 볼 수 있다.
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="shell">
+    <nav id="toc" aria-label="목차">
+      <a class="top-link" href="#intro">↑ 강좌 소개</a>
+      <!-- TOC-PLACEHOLDER -->
+    </nav>
+    <main>
+      <section id="intro">
+        <h3 class="lesson serif" style="margin-top:48px">강좌 구성</h3>
+        <p>
+          이 강좌는 네 개의 모듈로 이루어진다. 각 모듈은 독립적으로 읽을 수 있지만,
+          1번부터 순서대로 읽으면 &ldquo;에이전트에게 능력 주기 → 환경 설계하기 → 자율 실행시키기 → 기억 구조화하기&rdquo;라는
+          하나의 성장 곡선을 따라가게 된다. 모듈마다 학습 목표, 본문 강의, 개념 그림, 핵심 용어,
+          이해도 점검 문제(클릭하면 답이 열린다), 실습 과제가 포함되어 있다.
+        </p>
+        <div class="map">
+          <!-- MAP-PLACEHOLDER -->
+        </div>
+      </section>
+
+      <!-- MODULE-1 -->
+      <!-- MODULE-2 -->
+      <!-- MODULE-3 -->
+      <!-- MODULE-4 -->
+    </main>
+  </div>
+</div>
+
+<footer class="course">
+  <div class="wrap">
+    <p>
+      원자료: Panaversity Agent Factory 공개 문서 —
+      <a href="https://agentfactory.panaversity.org/docs/skills-connectors-crash-course" target="_blank" rel="noopener">Skills &amp; Connectors Crash Course</a> ·
+      <a href="https://agentfactory.panaversity.org/docs/harness-engineering-crash-course" target="_blank" rel="noopener">Harness Engineering Crash Course</a> ·
+      <a href="https://agentfactory.panaversity.org/docs/loop-engineering-crash-course" target="_blank" rel="noopener">Loop Engineering Crash Course</a> ·
+      <a href="https://agentfactory.panaversity.org/docs/graph-engineering-crash-course" target="_blank" rel="noopener">Graph Engineering Crash Course</a>
+    </p>
+    <p>
+      본 페이지의 한국어 본문은 위 문서의 개념을 학습 목적으로 요약·재구성한 2차 학습 자료이며, 원문의 축자 번역이 아니다.
+      모든 그림은 원본 도판의 개념을 참고해 한국어로 새로 그린 것이다. 원저작물의 권리는 원저작자에게 있다.
+    </p>
+  </div>
+</footer>
+
+<script>
+  // TOC scroll-spy
+  (function () {
+    var links = document.querySelectorAll('#toc ol a');
+    if (!links.length) return;
+    var map = {};
+    links.forEach(function (a) {
+      var id = a.getAttribute('href').slice(1);
+      var el = document.getElementById(id);
+      if (el) map[id] = a;
+    });
+    var current = null;
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          if (current) current.classList.remove('active');
+          current = map[e.target.id];
+          if (current) current.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -70% 0px' });
+    Object.keys(map).forEach(function (id) {
+      obs.observe(document.getElementById(id));
+    });
+  })();
+</script>
