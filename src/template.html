@@ -13,12 +13,13 @@
     --m2: #3A5FBF;  --m2-soft: #E4EAF9;
     --m3: #B26A00;  --m3-soft: #F7EDDD;
     --m4: #7A4FB3;  --m4-soft: #EFE7F8;
+    --m5: #A83A5C;  --m5-soft: #FAE6EC;
     --code-bg: #F0F2F6;
     --line-strong: #B9C2D0;
     --on-accent: #FFFFFF;
     --ok: #1F7A4D;       --ok-soft: #E2F1E8;
     --warn: #B2531B;     --warn-soft: #F8EAE0;
-    --danger: #B3261E;
+    --danger: #B3261E;   --danger-soft: #FAE6E4;
     --src: #7A6A2F;      --src-soft: #F4EFDC;
     --shadow: 0 1px 3px rgba(28,36,51,.08), 0 8px 24px rgba(28,36,51,.06);
   }
@@ -36,12 +37,13 @@
       --m2: #86A5EF;  --m2-soft: #1F2A45;
       --m3: #E0A34E;  --m3-soft: #38290F;
       --m4: #B79AE8;  --m4-soft: #2C2140;
+      --m5: #E88AA6;  --m5-soft: #3A1E28;
       --code-bg: #10131A;
       --line-strong: #3C4557;
       --on-accent: #10131A;
       --ok: #4FB37C;       --ok-soft: #17301F;
       --warn: #DB8B4A;     --warn-soft: #33220F;
-      --danger: #E8705F;
+      --danger: #E8705F;   --danger-soft: #34191A;
       --src: #C7B36A;      --src-soft: #2E2814;
       --shadow: 0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
     }
@@ -59,12 +61,13 @@
     --m2: #86A5EF;  --m2-soft: #1F2A45;
     --m3: #E0A34E;  --m3-soft: #38290F;
     --m4: #B79AE8;  --m4-soft: #2C2140;
+    --m5: #E88AA6;  --m5-soft: #3A1E28;
     --code-bg: #10131A;
     --line-strong: #3C4557;
     --on-accent: #10131A;
     --ok: #4FB37C;     --ok-soft: #17301F;
     --warn: #DB8B4A;     --warn-soft: #33220F;
-    --danger: #E8705F;
+    --danger: #E8705F;   --danger-soft: #34191A;
     --src: #C7B36A;    --src-soft: #2E2814;
     --shadow: 0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
   }
@@ -154,6 +157,7 @@
     border-top: 4px solid var(--mc, var(--accent));
   }
   .map a.card:hover { border-color: var(--mc, var(--accent)); }
+  .map a.card.m5 { grid-column: 1 / -1; }   /* 실습편은 한 줄을 다 쓴다 */
   .map .mod-no { font-size: 12px; letter-spacing: .14em; font-weight: 700; color: var(--mc); }
   .map h3 { margin: 6px 0 8px; font-size: 17.5px; line-height: 1.35; }
   .map p { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
@@ -249,6 +253,55 @@
   .exercise h4 { margin: 4px 0 8px; }
   .exercise p, .exercise li { font-size: 14.5px; }
 
+
+  /* ---------- lab track ---------- */
+  .mod-labs {
+    display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline;
+    background: var(--mc-soft); border-radius: 10px; padding: 13px 18px; margin: 18px 0 0;
+    font-size: 14px;
+  }
+  .mod-labs .t { font-weight: 700; color: var(--mc); letter-spacing: .02em; flex: none; }
+  .mod-labs a {
+    color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--mc);
+    padding-bottom: 1px;
+  }
+  .mod-labs a:hover { color: var(--mc); }
+
+  h3.lab-group {
+    font-size: 21.5px; font-weight: 800; margin: 52px 0 14px; line-height: 1.4;
+    padding-bottom: 10px; border-bottom: 2px solid var(--mc);
+  }
+  .lab {
+    background: var(--surface); border: 1px solid var(--line);
+    border-left: 4px solid var(--mc); border-radius: 10px;
+    padding: 20px 24px 8px; margin: 22px 0; box-shadow: var(--shadow);
+  }
+  .lab > h4.lab-h {
+    margin: 0 0 12px; font-size: 19px; font-weight: 800; line-height: 1.4;
+    display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+  }
+  .lab > h4.lab-h .lid {
+    font-size: 12.5px; font-weight: 800; letter-spacing: .08em; color: var(--mc);
+    background: var(--mc-soft); border-radius: 999px; padding: 3px 10px; flex: none;
+  }
+  .lab-meta { display: grid; gap: 4px 14px; margin: 0 0 16px; font-size: 13px; }
+  @media (min-width: 620px) { .lab-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .lab-meta .row { display: flex; gap: 8px; align-items: baseline; }
+  .lab-meta .k {
+    flex: none; width: 42px; color: var(--mc); font-weight: 700; font-size: 12px;
+    letter-spacing: .04em;
+  }
+  .lab-meta .v { color: var(--muted); }
+  .lab h5 {
+    margin: 20px 0 8px; font-size: 14px; font-weight: 800; letter-spacing: .03em;
+    color: var(--mc); text-transform: none;
+  }
+  .lab h5::before { content: "▸ "; opacity: .7; }
+  .lab p, .lab li { font-size: 15px; }
+  .lab pre { margin: 12px 0; }
+  .lab .tbl-wrap { margin: 12px 0; }
+  .lab > *:last-child { margin-bottom: 16px; }
+
   hr.mod-end { border: none; border-top: 1px solid var(--line); margin: 56px 0 0; }
 
   footer.course {
@@ -275,6 +328,7 @@
   .d-strong { fill: var(--mc-soft); stroke: var(--mc); stroke-width: 2.2; }
   .d-ok    { fill: var(--ok-soft); stroke: var(--ok); stroke-width: 1.4; }
   .d-warn  { fill: var(--warn-soft); stroke: var(--warn); stroke-width: 1.4; }
+  .d-bad-box { fill: var(--danger-soft); stroke: var(--danger); stroke-width: 1.4; }
   .d-warn-p{ fill: var(--warn-soft); stroke: var(--warn); stroke-width: 1.2; }
   .d-src   { fill: var(--src-soft); stroke: var(--src); stroke-width: 1.2; }
   .d-anchor{ fill: var(--surface-2); stroke: var(--ink); stroke-width: 2; stroke-dasharray: 3 3; }
@@ -326,6 +380,7 @@
   .m2 { --mc: var(--m2); --mc-soft: var(--m2-soft); }
   .m3 { --mc: var(--m3); --mc-soft: var(--m3-soft); }
   .m4 { --mc: var(--m4); --mc-soft: var(--m4-soft); }
+  .m5 { --mc: var(--m5); --mc-soft: var(--m5-soft); }
 
   a:focus-visible, summary:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px;
@@ -363,10 +418,18 @@
       <section id="intro">
         <h3 class="lesson serif" style="margin-top:48px">강좌 구성</h3>
         <p>
-          이 강좌는 네 개의 모듈로 이루어진다. 각 모듈은 독립적으로 읽을 수 있지만,
-          1번부터 순서대로 읽으면 &ldquo;에이전트에게 능력 주기 → 환경 설계하기 → 자율 실행시키기 → 기억 구조화하기&rdquo;라는
+          이 강좌는 개념을 다루는 네 개의 모듈과, 그것을 손으로 확인하는 하나의 실습편으로 이루어진다.
+          모듈은 독립적으로 읽을 수 있지만 1번부터 순서대로 읽으면
+          &ldquo;에이전트에게 능력 주기 → 환경 설계하기 → 자율 실행시키기 → 기억 구조화하기&rdquo;라는
           하나의 성장 곡선을 따라가게 된다. 모듈마다 학습 목표, 본문 강의, 개념 그림, 핵심 용어,
           이해도 점검 문제(클릭하면 답이 열린다), 실습 과제가 포함되어 있다.
+        </p>
+        <p>
+          <strong>실습편</strong>은 네 모듈의 개념을 오픈소스 에이전트
+          <a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noopener">Hermes</a>로
+          직접 만들어 보는 열아홉 개의 실습이다. 설치와 서버 연결부터 시작해 스킬·커넥터·훅·게이트·감시 루프·기억
+          그래프·근거 검증기까지 이어지며, 모든 명령과 기대 결과는 실제로 실행해 확인한 것이다.
+          각 모듈 상단에 해당 실습으로 가는 링크가 있다.
         </p>
         <div class="map">
           <!-- MAP-PLACEHOLDER -->
@@ -377,6 +440,7 @@
       <!-- MODULE-2 -->
       <!-- MODULE-3 -->
       <!-- MODULE-4 -->
+      <!-- LAB -->
     </main>
   </div>
 </div>

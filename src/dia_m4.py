@@ -125,14 +125,14 @@ def _twog():
     o.append(box(ix + 96, iy + 8, 128, 34, "claim_244", cls="d-panel-2", tsize=10.5))
     o.append(box(ix + 96, iy + 62, 128, 34, "claim_301", cls="d-node-a", tsize=10.5))
     o.append(box(ix, iy + 122, 130, 34, "entity_pg_api", cls="d-box", tsize=10.5))
-    o.append(box(ix + 190, iy + 122, 130, 34, "ci_log", cls="d-src", tsize=10.5))
+    o.append(box(ix + 190, iy + 118, 130, 44, "ci_log", ["confidence 0.9"],
+                 cls="d-src", tsize=10.5, ssize=9))
     o.append(arrow_a(ix + 160, iy + 60, ix + 160, iy + 44, u))
-    o.append(text(ix + 168, iy + 54, "supersedes — 대체하되 지우지 않는다", 9.5, "start", "d-t d-acc"))
+    o.append(text(ix + 168, iy + 54, "supersedes", 9.5, "start", "d-t d-acc", "700"))
     o.append(arrow(ix + 130, iy + 96, ix + 78, iy + 120, u))
     o.append(text(ix + 78, iy + 112, "about", 9.5, "middle", "d-t d-dim", halo=True))
     o.append(arrow(ix + 190, iy + 96, ix + 240, iy + 120, u))
     o.append(text(ix + 244, iy + 110, "supported_by", 9.5, "middle", "d-t d-dim", halo=True))
-    o.append(text(ix + 250, iy + 172, "confidence 0.9", 9.5, "middle", "d-t d-dim"))
     p, ix, iy, iw, _ = panel(90, 228, 540, 92, "잇되, 합치지 않는다", dash=True, cls="d-panel-2")
     o.append(p)
     o.append(box(ix + 200, iy + 8, 130, 34, "run_77", cls="d-strong", tsize=11))
@@ -142,8 +142,8 @@ def _twog():
     o.append(arrow(ix + 332, iy + 25, ix + 376, iy + 25, u, "produced", lab_dy=-7))
     o.append(text(ix + 74, iy + 60, "작업 계보", 10, "middle", "d-t d-dim"))
     o.append(text(ix + 456, iy + 60, "도메인 지식", 10, "middle", "d-t d-dim"))
-    o.append(note(360, 342, "실험 노트와 백과사전 — 둘 다 유지하고, 상호 참조하고, 절대 합치지 않는다", W))
-    return "".join(o), 358
+    o.append(note(360, 352, "실험 노트와 백과사전 — 둘 다 유지하고, 상호 참조하고, 절대 합치지 않는다. supersedes는 대체이지 삭제가 아니다", W))
+    return "".join(o), 370
 
 
 reg("two-graphs", W, _twog()[1],
@@ -198,10 +198,10 @@ def _r2d():
         o.append(node(x, y, "", 13, "d-node-a" if ok else "d-node-w"))
         if not ok:
             o.append(cross(x, y, 6))
-    o.append(text(ix + 100, iy + 124, "폐기된 결과도 여전히 node다", 10, "middle", "d-t d-dim"))
-    o.append(text(ix + 100, iy + 144, "children · leaves · lineage", 10, "middle", "d-t d-acc", "700"))
-    o.append(note(360, 336, "Git은 성공을, 로그는 시도를 보관한다. 그러나 나중의 에이전트가 둘 다 질의하게 해 주는 것은 그래프뿐이다", W))
-    return "".join(o), 352
+    o.append(text(ix + 100, iy + 132, "폐기된 결과도 여전히 node다", 10, "middle", "d-t d-dim"))
+    o.append(text(ix + 100, iy + 148, "children · leaves · lineage", 10, "middle", "d-t d-acc", "700"))
+    o.append(note(360, 356, "Git은 성공을, 로그는 시도를 보관한다. 그러나 나중의 에이전트가 둘 다 질의하게 해 주는 것은 그래프뿐이다", W))
+    return "".join(o), 372
 
 
 reg("ratchet-to-dag", W, _r2d()[1],

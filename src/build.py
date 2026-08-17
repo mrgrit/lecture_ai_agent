@@ -2,10 +2,10 @@
 """Assemble the four Korean course modules into one static HTML page."""
 import re
 import html as H
-import dia_m1, dia_m2, dia_m3, dia_m4
+import dia_m1, dia_m2, dia_m3, dia_m4, dia_lab
 
 DIA = {}
-for m in (dia_m1, dia_m2, dia_m3, dia_m4):
+for m in (dia_m1, dia_m2, dia_m3, dia_m4, dia_lab):
     DIA.update(m.D)
 
 MODS = [
@@ -30,6 +30,30 @@ MODS = [
          src="https://agentfactory.panaversity.org/docs/graph-engineering-crash-course",
          srcname="Graph Engineering Crash Course"),
 ]
+
+LAB = dict(n=5, cls="m5", file="modules/lab-hermes.md",
+           short="실습편 · Hermes",
+           lede="설치부터 근거 검증기까지, 열아홉 개의 실습으로 네 모듈을 손으로 확인한다. 모든 명령과 결과는 실제로 돌려서 확인했다.")
+
+# 각 모듈 상단 배너에 걸 실습 링크 (모듈 번호 → [(lab id, 라벨), ...])
+MOD_LABS = {
+    1: [("l1-1", "L1-1 첫 스킬 만들고 발동 증명하기"),
+        ("l1-2", "L1-2 스킬끼리 관계 맺기"),
+        ("l1-3", "L1-3 커넥터 직접 만들어 붙이기"),
+        ("l1-4", "L1-4 모델을 바꾸면 얼마나 좋아지나")],
+    2: [("l2-1", "L2-1 승인 사다리 판정해 보기"),
+        ("l2-2", "L2-2 AGENTS.md로 제약 걸기"),
+        ("l2-3", "L2-3 위험한 명령 막는 훅"),
+        ("l2-4", "L2-4 테스트 게이트"),
+        ("l2-5", "L2-5 공급망 감사")],
+    3: [("l3-1", "L3-1 조용한 하트비트"),
+        ("l3-2", "L3-2 변화가 있을 때만 깨우기"),
+        ("l3-3", "L3-3 이어서 하는 루프"),
+        ("l3-4", "L3-4 비용을 숫자로 보기")],
+    4: [("l4-1", "L4-1 세션을 넘는 기억"),
+        ("l4-2", "L4-2 기억 그래프 열어 보기"),
+        ("l4-3", "L4-3 근거 검증기 만들기")],
+}
 
 FIGNO = [0]
 
@@ -73,9 +97,13 @@ def figure(block, mod):
     if uid not in DIA:
         return ""
     FIGNO[0] += 1
-    cap = ('<figcaption><span class="fig-no">그림 %d.</span> %s '
-           '<span class="fig-src">원본 도판: <code>%s</code></span></figcaption>'
-           % (FIGNO[0], esc(d.get("제목", "")), esc(d.get("원본", ""))))
+    src = d.get("원본", "")
+    if src.startswith("("):          # 실습편 그림은 대응하는 원본 도판이 없다
+        src_html = '<span class="fig-src">이 강좌에서 새로 작도한 그림</span>'
+    else:
+        src_html = '<span class="fig-src">원본 도판: <code>%s</code></span>' % esc(src)
+    cap = ('<figcaption><span class="fig-no">그림 %d.</span> %s %s</figcaption>'
+           % (FIGNO[0], esc(d.get("제목", "")), src_html))
     return ('<figure class="diagram" id="fig-%s"><div class="fig-scroll">%s</div>%s</figure>'
             % (uid, DIA[uid], cap))
 
@@ -95,7 +123,7 @@ def split_row(line):
     return [c.strip() for c in line.strip().strip("|").split("|")]
 
 
-def convert(md, mod):
+def convert(md, mod, sub_tag="h4"):
     """Markdown → HTML for one module body. Returns (html, [(id,title)])."""
     lines = md.split("\n")
     out, toc = [], []
@@ -139,7 +167,10 @@ def convert(md, mod):
             i += 1
             continue
         if ln.startswith("### "):
-            out.append("<h4>%s</h4>" % inline(ln[4:].strip()))
+            out.append("<%s>%s</%s>" % (sub_tag, inline(ln[4:].strip()), sub_tag))
+            i += 1
+            continue
+        if ln.startswith("> "):          # lab meta strip lines are pulled out earlier
             i += 1
             continue
         if ln.startswith("# "):
@@ -185,6 +216,44 @@ def convert(md, mod):
     return "".join(out), toc
 
 
+def extract_quiz(md_rest, where, minimum=5):
+    """Pull the 이해도 점검 block out and render it as details/summary cards."""
+    quiz = re.search(r"## 이해도 점검\n(.*?)(?=\n## |\Z)", md_rest, re.S)
+    if not quiz:
+        return md_rest, ""
+    qs = re.findall(
+        r"\*\*Q?\d+\.\s*(.+?)\*\*\s*\n+\s*답[:：]\s*(.+?)(?=\n\s*\*\*Q?\d+\.|\Z)",
+        quiz.group(1), re.S)
+    items = ['<details><summary>%s</summary><div class="answer">%s</div></details>'
+             % (inline(" ".join(q.split())), inline(" ".join(a.split()))) for q, a in qs]
+    assert len(items) >= minimum, (where, len(items))
+    md_rest = md_rest.replace(quiz.group(0), "\n## 이해도 점검\n@@QUIZ@@\n")
+    return md_rest, '<div class="quiz">%s</div>' % "".join(items)
+
+
+def extract_exercises(md_rest, where, minimum=2):
+    """Pull the 실습 과제 block out and render it as cards."""
+    ex = re.search(r"## 실습 과제\n(.*?)(?=\n## |\Z)", md_rest, re.S)
+    if not ex:
+        return md_rest, ""
+    raw = ex.group(1)
+    first = re.search(r"\*\*과제 \d+\.", raw)
+    lead = raw[:first.start()].strip() if first else ""
+    blocks = re.findall(r"\*\*과제 (\d+)\.\s*(.+?)\*\*\s*(.*?)(?=\n\s*\*\*과제 \d+\.|\Z)",
+                        raw, re.S)
+    cards = []
+    if lead:
+        cards.append("<p>%s</p>" % inline(" ".join(lead.split())))
+    for num, head, body in blocks:
+        cards.append('<div class="exercise"><div class="ex-no">과제 %s</div>'
+                     '<h4>%s</h4><p>%s</p></div>'
+                     % (num, inline(head.strip().rstrip(".")),
+                        inline(" ".join(body.split()))))
+    assert len(blocks) >= minimum, (where, len(blocks))
+    md_rest = md_rest.replace(ex.group(0), "\n## 실습 과제\n@@EX@@\n")
+    return md_rest, "".join(cards)
+
+
 def build_module(mod):
     md = open(mod["file"], encoding="utf-8").read()
     title = re.search(r"^# (.+)$", md, re.M).group(1)
@@ -197,41 +266,8 @@ def build_module(mod):
     if obj:
         md_rest = md.replace(obj.group(0), "")
 
-    # quiz block → details/summary
-    quiz = re.search(r"## 이해도 점검\n(.*?)(?=\n## |\Z)", md_rest, re.S)
-    quiz_html = ""
-    if quiz:
-        qs = re.findall(
-            r"\*\*Q?\d+\.\s*(.+?)\*\*\s*\n+\s*답[:：]\s*(.+?)(?=\n\s*\*\*Q?\d+\.|\Z)",
-            quiz.group(1), re.S)
-        items = []
-        for q, a in qs:
-            items.append('<details><summary>%s</summary><div class="answer">%s</div></details>'
-                         % (inline(" ".join(q.split())), inline(" ".join(a.split()))))
-        quiz_html = '<div class="quiz">%s</div>' % "".join(items)
-        assert len(items) >= 5, (mod["file"], len(items))
-        md_rest = md_rest.replace(quiz.group(0), "\n## 이해도 점검\n@@QUIZ@@\n")
-
-    # exercises → cards (title may sit on the same line as the body)
-    ex = re.search(r"## 실습 과제\n(.*?)(?=\n## |\Z)", md_rest, re.S)
-    ex_html = ""
-    if ex:
-        raw = ex.group(1)
-        first = re.search(r"\*\*과제 \d+\.", raw)
-        lead = raw[:first.start()].strip() if first else ""
-        blocks = re.findall(r"\*\*과제 (\d+)\.\s*(.+?)\*\*\s*(.*?)(?=\n\s*\*\*과제 \d+\.|\Z)",
-                            raw, re.S)
-        cards = []
-        if lead:
-            cards.append("<p>%s</p>" % inline(" ".join(lead.split())))
-        for num, head, body in blocks:
-            cards.append('<div class="exercise"><div class="ex-no">과제 %s</div>'
-                         '<h4>%s</h4><p>%s</p></div>'
-                         % (num, inline(head.strip().rstrip(".")),
-                            inline(" ".join(body.split()))))
-        ex_html = "".join(cards)
-        assert len(blocks) >= 2, (mod["file"], len(blocks))
-        md_rest = md_rest.replace(ex.group(0), "\n## 실습 과제\n@@EX@@\n")
+    md_rest, quiz_html = extract_quiz(md_rest, mod["file"])
+    md_rest, ex_html = extract_exercises(md_rest, mod["file"])
 
     body, toc = convert(md_rest, mod)
     body = body.replace("<p>@@QUIZ@@</p>", quiz_html).replace("<p>@@EX@@</p>", ex_html)
@@ -241,16 +277,105 @@ def build_module(mod):
         obj_html = ('<div class="objectives"><h3>학습 목표</h3><ul>%s</ul></div>'
                     % "".join("<li>%s</li>" % inline(x) for x in obj_items))
 
+    labs = MOD_LABS.get(mod["n"], [])
+    lab_html = ""
+    if labs:
+        lab_html = ('<p class="mod-labs"><span class="t">이 모듈의 실습 →</span>%s</p>'
+                    % "".join('<a href="#lab-%s">%s</a>' % (i, esc(t)) for i, t in labs))
+
     head = (
         '<section class="module %s" id="mod%d">'
         '<div class="mod-head"><span class="mod-chip">MODULE %d</span>'
         '<h2 class="mod-title">%s</h2><p class="mod-lede">%s</p>'
         '<p class="mod-src">원자료: <a href="%s" target="_blank" rel="noopener">%s</a> '
-        '— 아래 본문은 이 문서의 개념을 한국어로 요약·재구성한 학습 자료다.</p></div>%s%s'
+        '— 아래 본문은 이 문서의 개념을 한국어로 요약·재구성한 학습 자료다.</p>%s</div>%s%s'
         '<hr class="mod-end"></section>'
         % (mod["cls"], mod["n"], mod["n"], esc(title), esc(mod["lede"]),
-           mod["src"], esc(mod["srcname"]), obj_html, body))
+           mod["src"], esc(mod["srcname"]), lab_html, obj_html, body))
     return head, toc, title
+
+
+# ------------------------------------------------------------------ lab track
+
+META_ICONS = {"대응": "대응", "소요": "소요", "선행": "선행", "확인": "확인"}
+
+
+def lab_card(head_line, body_md, mod):
+    """One `## Lx-y. 제목` block → a lab card."""
+    m = re.match(r"^(L\d-\d+)\.\s*(.+)$", head_line)
+    lid, title = m.group(1), m.group(2)
+    anchor = "lab-" + lid.lower()
+
+    rows = re.findall(r"^>\s*(\S+)\s*\|\s*(.+?)\s*$", body_md, re.M)
+    body_md = re.sub(r"^>\s*\S+\s*\|.*$", "", body_md, flags=re.M)
+    meta = ""
+    if rows:
+        meta = ('<div class="lab-meta">%s</div>'
+                % "".join('<div class="row"><span class="k">%s</span>'
+                          '<span class="v">%s</span></div>'
+                          % (esc(META_ICONS.get(k, k)), inline(v)) for k, v in rows))
+
+    body, _ = convert(body_md, mod, sub_tag="h5")
+    return ('<section class="lab" id="%s"><h4 class="lab-h">'
+            '<span class="lid">%s</span><span>%s</span></h4>%s%s</section>'
+            % (anchor, esc(lid), inline(title), meta, body)), anchor, lid, title
+
+
+def build_lab(mod):
+    md = open(mod["file"], encoding="utf-8").read()
+    title = re.search(r"^# (.+)$", md, re.M).group(1)
+    title = re.sub(r"^실습편\.\s*", "", title)
+
+    md_rest, quiz_html = extract_quiz(md, mod["file"], minimum=6)
+    md_rest, ex_html = extract_exercises(md_rest, mod["file"], minimum=3)
+
+    # split at every `## ` heading — but never inside a fenced code block
+    # (SKILL.md heredocs in the labs contain their own `## ` lines)
+    parts, cur, fenced = [], None, False
+    for ln in md_rest.split("\n"):
+        if ln.startswith("```"):
+            fenced = not fenced
+        if not fenced and ln.startswith("## "):
+            cur = [ln[3:]]
+            parts.append(cur)
+            continue
+        if cur is not None:
+            cur.append(ln)
+    parts = ["\n".join(p) for p in parts]
+    out, toc, index, sec = [], [], [], 0
+    for part in parts:
+        head_line, _, rest = part.partition("\n")
+        head_line = head_line.strip()
+        if re.match(r"^L\d-\d+\.", head_line):
+            html, anchor, lid, ltitle = lab_card(head_line, rest, mod)
+            out.append(html)
+            index.append((anchor, lid, ltitle))
+            continue
+        sec += 1
+        sid = "m%d-s%d" % (mod["n"], sec)
+        toc.append((sid, re.sub(r"\s+—.*$", "", head_line)))
+        cls = "lab-group" if re.match(r"^실습 \d", head_line) else "lesson plain"
+        out.append('<h3 class="%s" id="%s"><span>%s</span></h3>' % (cls, sid, inline(head_line)))
+        body, _ = convert(rest, mod)
+        body = body.replace("<p>@@QUIZ@@</p>", quiz_html).replace("<p>@@EX@@</p>", ex_html)
+        out.append(body)
+
+    idx_html = ('<div class="tbl-wrap"><table><thead><tr><th>번호</th><th>실습</th></tr></thead>'
+                '<tbody>%s</tbody></table></div>'
+                % "".join('<tr><td><a href="#%s">%s</a></td><td>%s</td></tr>'
+                          % (a, esc(l), inline(t)) for a, l, t in index))
+    body = "".join(out).replace("@@INDEX@@", idx_html)
+
+    head = (
+        '<section class="module %s" id="mod%d">'
+        '<div class="mod-head"><span class="mod-chip">LAB TRACK</span>'
+        '<h2 class="mod-title">%s</h2><p class="mod-lede">%s</p>'
+        '<p class="mod-src">사용 도구: <a href="https://github.com/NousResearch/hermes-agent" '
+        'target="_blank" rel="noopener">Hermes Agent</a> (Nous Research, 오픈소스) '
+        '— 아래 모든 명령과 기대 결과는 Hermes 0.20.0 · qwen3.8:27b 환경에서 실제로 실행해 확인한 것이다.</p>'
+        '</div>%s<hr class="mod-end"></section>'
+        % (mod["cls"], mod["n"], esc(title), esc(mod["lede"]), body))
+    return head, toc, title, index
 
 
 def main():
@@ -266,6 +391,16 @@ def main():
         cards.append('<a class="card %s" href="#mod%d"><span class="mod-no">MODULE %d</span>'
                      '<h3>%s</h3><p>%s</p></a>'
                      % (mod["cls"], mod["n"], mod["n"], esc(mod["short"]), esc(mod["lede"])))
+    lab_html, lab_toc, lab_title, lab_index = build_lab(LAB)
+    links = "".join('<li><a href="#%s">%s</a></li>' % (i, esc(t)) for i, t in lab_toc)
+    tocs.append('<div class="toc-mod %s"><a class="toc-mod-title" href="#mod%d">'
+                '<span class="dot"></span>%s</a><ol>%s</ol></div>'
+                % (LAB["cls"], LAB["n"], esc(LAB["short"]), links))
+    cards.append('<a class="card %s" href="#mod%d"><span class="mod-no">LAB TRACK · 실습 %d개</span>'
+                 '<h3>%s</h3><p>%s</p></a>'
+                 % (LAB["cls"], LAB["n"], len(lab_index), esc(LAB["short"]), esc(LAB["lede"])))
+    tpl = tpl.replace("<!-- LAB -->", lab_html)
+
     tpl = tpl.replace("<!-- TOC-PLACEHOLDER -->", "".join(tocs))
     tpl = tpl.replace("<!-- MAP-PLACEHOLDER -->", "".join(cards))
     for k, b in enumerate(bodies):
