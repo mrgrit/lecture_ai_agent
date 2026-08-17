@@ -23,8 +23,8 @@ for href in sorted(set(re.findall(r'href="#([^"]+)"', html))):
         bad("dangling anchor #%s" % href)
 
 labs = re.findall(r'<section class="lab" id="(lab-l\d-\d+)"', html)
-if len(labs) != 19:
-    bad("expected 19 lab cards, found %d" % len(labs))
+if len(labs) != 23:
+    bad("expected 23 lab cards, found %d" % len(labs))
 if len(labs) != len(set(labs)):
     bad("duplicate lab ids")
 

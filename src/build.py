@@ -2,10 +2,10 @@
 """Assemble the four Korean course modules into one static HTML page."""
 import re
 import html as H
-import dia_m1, dia_m2, dia_m3, dia_m4, dia_lab
+import dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab
 
 DIA = {}
-for m in (dia_m1, dia_m2, dia_m3, dia_m4, dia_lab):
+for m in (dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab):
     DIA.update(m.D)
 
 MODS = [
@@ -29,11 +29,16 @@ MODS = [
          lede="에이전트는 잊지만 그래프는 잊지 않는다. 여러 에이전트가 공유하는, 출처가 딸린 기억을 만든다.",
          src="https://agentfactory.panaversity.org/docs/graph-engineering-crash-course",
          srcname="Graph Engineering Crash Course"),
+    dict(n=5, cls="m5", file="modules/module5-spec-driven-development.md",
+         short="명세 주도 개발",
+         lede="어떻게를 만들기 전에 무엇을 합의한다. 네 모듈이 '어떻게'를 다뤘다면 이 모듈은 그 앞에 오는 '무엇을'을 다룬다.",
+         src="https://agentfactory.panaversity.org/docs/spec-driven-development-crash-course",
+         srcname="Spec-Driven Development Crash Course"),
 ]
 
-LAB = dict(n=5, cls="m5", file="modules/lab-hermes.md",
+LAB = dict(n=6, cls="m6", file="modules/lab-hermes.md",
            short="실습편 · Hermes",
-           lede="설치부터 근거 검증기까지, 열아홉 개의 실습으로 네 모듈을 손으로 확인한다. 모든 명령과 결과는 실제로 돌려서 확인했다.")
+           lede="설치부터 근거 검증기까지, 스물세 개의 실습으로 네 모듈을 손으로 확인한다. 모든 명령과 결과는 실제로 돌려서 확인했다.")
 
 # 각 모듈 상단 배너에 걸 실습 링크 (모듈 번호 → [(lab id, 라벨), ...])
 MOD_LABS = {
@@ -53,6 +58,10 @@ MOD_LABS = {
     4: [("l4-1", "L4-1 세션을 넘는 기억"),
         ("l4-2", "L4-2 기억 그래프 열어 보기"),
         ("l4-3", "L4-3 근거 검증기 만들기")],
+    5: [("l5-1", "L5-1 명세 있을 때와 없을 때"),
+        ("l5-2", "L5-2 AI가 나를 인터뷰하게 하기"),
+        ("l5-3", "L5-3 수용 기준을 게이트에 연결"),
+        ("l5-4", "L5-4 명세 표류 만들고 잡기")],
 }
 
 FIGNO = [0]
@@ -100,8 +109,10 @@ def figure(block, mod):
     src = d.get("원본", "")
     if src.startswith("("):          # 실습편 그림은 대응하는 원본 도판이 없다
         src_html = '<span class="fig-src">이 강좌에서 새로 작도한 그림</span>'
-    else:
+    elif src.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".svg")):
         src_html = '<span class="fig-src">원본 도판: <code>%s</code></span>' % esc(src)
+    else:                            # 파일명을 확인할 수 없는 원문 삽화
+        src_html = '<span class="fig-src">원본 도판: %s</span>' % esc(src)
     cap = ('<figcaption><span class="fig-no">그림 %d.</span> %s %s</figcaption>'
            % (FIGNO[0], esc(d.get("제목", "")), src_html))
     return ('<figure class="diagram" id="fig-%s"><div class="fig-scroll">%s</div>%s</figure>'

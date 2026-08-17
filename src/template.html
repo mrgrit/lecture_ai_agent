@@ -13,7 +13,8 @@
     --m2: #3A5FBF;  --m2-soft: #E4EAF9;
     --m3: #B26A00;  --m3-soft: #F7EDDD;
     --m4: #7A4FB3;  --m4-soft: #EFE7F8;
-    --m5: #A83A5C;  --m5-soft: #FAE6EC;
+    --m5: #1F6F8B;  --m5-soft: #E1EEF3;
+    --m6: #A83A5C;  --m6-soft: #FAE6EC;
     --code-bg: #F0F2F6;
     --line-strong: #B9C2D0;
     --on-accent: #FFFFFF;
@@ -37,7 +38,8 @@
       --m2: #86A5EF;  --m2-soft: #1F2A45;
       --m3: #E0A34E;  --m3-soft: #38290F;
       --m4: #B79AE8;  --m4-soft: #2C2140;
-      --m5: #E88AA6;  --m5-soft: #3A1E28;
+      --m5: #6FB8D4;  --m5-soft: #16303A;
+      --m6: #E88AA6;  --m6-soft: #3A1E28;
       --code-bg: #10131A;
       --line-strong: #3C4557;
       --on-accent: #10131A;
@@ -61,7 +63,8 @@
     --m2: #86A5EF;  --m2-soft: #1F2A45;
     --m3: #E0A34E;  --m3-soft: #38290F;
     --m4: #B79AE8;  --m4-soft: #2C2140;
-    --m5: #E88AA6;  --m5-soft: #3A1E28;
+    --m5: #6FB8D4;  --m5-soft: #16303A;
+    --m6: #E88AA6;  --m6-soft: #3A1E28;
     --code-bg: #10131A;
     --line-strong: #3C4557;
     --on-accent: #10131A;
@@ -157,7 +160,7 @@
     border-top: 4px solid var(--mc, var(--accent));
   }
   .map a.card:hover { border-color: var(--mc, var(--accent)); }
-  .map a.card.m5 { grid-column: 1 / -1; }   /* 실습편은 한 줄을 다 쓴다 */
+  .map a.card.m6 { grid-column: 1 / -1; }   /* 실습편은 한 줄을 다 쓴다 */
   .map .mod-no { font-size: 12px; letter-spacing: .14em; font-weight: 700; color: var(--mc); }
   .map h3 { margin: 6px 0 8px; font-size: 17.5px; line-height: 1.35; }
   .map p { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
@@ -381,6 +384,7 @@
   .m3 { --mc: var(--m3); --mc-soft: var(--m3-soft); }
   .m4 { --mc: var(--m4); --mc-soft: var(--m4-soft); }
   .m5 { --mc: var(--m5); --mc-soft: var(--m5-soft); }
+  .m6 { --mc: var(--m6); --mc-soft: var(--m6-soft); }
 
   a:focus-visible, summary:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px;
@@ -427,7 +431,7 @@
         <p>
           <strong>실습편</strong>은 네 모듈의 개념을 오픈소스 에이전트
           <a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noopener">Hermes</a>로
-          직접 만들어 보는 열아홉 개의 실습이다. 설치와 서버 연결부터 시작해 스킬·커넥터·훅·게이트·감시 루프·기억
+          직접 만들어 보는 스물세 개의 실습이다. 설치와 서버 연결부터 시작해 스킬·커넥터·훅·게이트·감시 루프·기억
           그래프·근거 검증기까지 이어지며, 모든 명령과 기대 결과는 실제로 실행해 확인한 것이다.
           각 모듈 상단에 해당 실습으로 가는 링크가 있다.
         </p>
@@ -440,6 +444,7 @@
       <!-- MODULE-2 -->
       <!-- MODULE-3 -->
       <!-- MODULE-4 -->
+      <!-- MODULE-5 -->
       <!-- LAB -->
     </main>
   </div>
