@@ -2,10 +2,10 @@
 """Assemble the four Korean course modules into one static HTML page."""
 import re
 import html as H
-import dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab
+import dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab, dia_labcc
 
 DIA = {}
-for m in (dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab):
+for m in (dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab, dia_labcc):
     DIA.update(m.D)
 
 MODS = [
@@ -36,32 +36,43 @@ MODS = [
          srcname="Spec-Driven Development Crash Course"),
 ]
 
-LAB = dict(n=6, cls="m6", file="modules/lab-hermes.md",
-           short="실습편 · Hermes",
-           lede="설치부터 근거 검증기까지, 스물세 개의 실습으로 네 모듈을 손으로 확인한다. 모든 명령과 결과는 실제로 돌려서 확인했다.")
+LABS = [
+    dict(n=6, cls="m6", file="modules/lab-hermes.md", pre="L",
+         short="실습편 · Hermes",
+         lede="설치부터 근거 검증기까지, 스물세 개의 실습으로 다섯 모듈을 손으로 확인한다. 학교 GPU 서버의 로컬 모델을 쓰므로 학생 부담이 없다.",
+         tool='사용 도구: <a href="https://github.com/NousResearch/hermes-agent" '
+              'target="_blank" rel="noopener">Hermes Agent</a> (Nous Research, 오픈소스) '
+              '— 아래 모든 명령과 기대 결과는 Hermes 0.20.0 · qwen3.8:27b 환경에서 실제로 실행해 확인한 것이다.'),
+    dict(n=7, cls="m7", file="modules/lab-claude-code.md", pre="C",
+         short="실습편 · Claude Code",
+         lede="같은 스물세 개를 Claude Code로 한 번 더. 번호까지 일대일로 맞췄으므로 두 트랙을 나란히 비교할 수 있다.",
+         tool='사용 도구: <a href="https://claude.com/claude-code" '
+              'target="_blank" rel="noopener">Claude Code</a> (Anthropic) '
+              '— 아래 모든 명령과 기대 결과는 Claude Code 2.1.259 · claude-haiku-4-5 환경에서 실제로 실행해 확인한 것이다.'),
+]
 
 # 각 모듈 상단 배너에 걸 실습 링크 (모듈 번호 → [(lab id, 라벨), ...])
 MOD_LABS = {
-    1: [("l1-1", "L1-1 첫 스킬 만들고 발동 증명하기"),
-        ("l1-2", "L1-2 스킬끼리 관계 맺기"),
-        ("l1-3", "L1-3 커넥터 직접 만들어 붙이기"),
-        ("l1-4", "L1-4 모델을 바꾸면 얼마나 좋아지나")],
-    2: [("l2-1", "L2-1 승인 사다리 판정해 보기"),
-        ("l2-2", "L2-2 AGENTS.md로 제약 걸기"),
-        ("l2-3", "L2-3 위험한 명령 막는 훅"),
-        ("l2-4", "L2-4 테스트 게이트"),
-        ("l2-5", "L2-5 공급망 감사")],
-    3: [("l3-1", "L3-1 조용한 하트비트"),
-        ("l3-2", "L3-2 변화가 있을 때만 깨우기"),
-        ("l3-3", "L3-3 이어서 하는 루프"),
-        ("l3-4", "L3-4 비용을 숫자로 보기")],
-    4: [("l4-1", "L4-1 세션을 넘는 기억"),
-        ("l4-2", "L4-2 기억 그래프 열어 보기"),
-        ("l4-3", "L4-3 근거 검증기 만들기")],
-    5: [("l5-1", "L5-1 명세 있을 때와 없을 때"),
-        ("l5-2", "L5-2 AI가 나를 인터뷰하게 하기"),
-        ("l5-3", "L5-3 수용 기준을 게이트에 연결"),
-        ("l5-4", "L5-4 명세 표류 만들고 잡기")],
+    1: [("1-1", "첫 스킬 만들고 발동 증명하기"),
+        ("1-2", "스킬끼리 관계 맺기"),
+        ("1-3", "커넥터 직접 만들어 붙이기"),
+        ("1-4", "모델을 바꾸면 얼마나 좋아지나")],
+    2: [("2-1", "승인 사다리 판정해 보기"),
+        ("2-2", "폴더 규칙으로 제약 걸기"),
+        ("2-3", "위험한 명령 막는 훅"),
+        ("2-4", "테스트 게이트"),
+        ("2-5", "공급망 감사")],
+    3: [("3-1", "조용한 하트비트"),
+        ("3-2", "변화가 있을 때만 깨우기"),
+        ("3-3", "이어서 하는 루프"),
+        ("3-4", "비용을 숫자로 보기")],
+    4: [("4-1", "세션을 넘는 기억"),
+        ("4-2", "기억·발자국 그래프 열어 보기"),
+        ("4-3", "근거 검증기 만들기")],
+    5: [("5-1", "명세 있을 때와 없을 때"),
+        ("5-2", "AI가 나를 인터뷰하게 하기"),
+        ("5-3", "수용 기준을 게이트에 연결"),
+        ("5-4", "명세 표류 만들고 잡기")],
 }
 
 FIGNO = [0]
@@ -291,8 +302,14 @@ def build_module(mod):
     labs = MOD_LABS.get(mod["n"], [])
     lab_html = ""
     if labs:
-        lab_html = ('<p class="mod-labs"><span class="t">이 모듈의 실습 →</span>%s</p>'
-                    % "".join('<a href="#lab-%s">%s</a>' % (i, esc(t)) for i, t in labs))
+        rows = []
+        for lab in LABS:
+            pre = lab["pre"]
+            links = "".join('<a href="#lab-%s%s">%s%s %s</a>'
+                            % (pre.lower(), i, pre, i, esc(t)) for i, t in labs)
+            rows.append('<p class="mod-labs %s"><span class="t">%s로 →</span>%s</p>'
+                        % (lab["cls"], esc(lab["short"].split(" · ")[-1]), links))
+        lab_html = "".join(rows)
 
     head = (
         '<section class="module %s" id="mod%d">'
@@ -313,7 +330,7 @@ META_ICONS = {"대응": "대응", "소요": "소요", "선행": "선행", "확�
 
 def lab_card(head_line, body_md, mod):
     """One `## Lx-y. 제목` block → a lab card."""
-    m = re.match(r"^(L\d-\d+)\.\s*(.+)$", head_line)
+    m = re.match(r"^([LC]\d-\d+)\.\s*(.+)$", head_line)
     lid, title = m.group(1), m.group(2)
     anchor = "lab-" + lid.lower()
 
@@ -357,7 +374,7 @@ def build_lab(mod):
     for part in parts:
         head_line, _, rest = part.partition("\n")
         head_line = head_line.strip()
-        if re.match(r"^L\d-\d+\.", head_line):
+        if re.match(r"^[LC]\d-\d+\.", head_line):
             html, anchor, lid, ltitle = lab_card(head_line, rest, mod)
             out.append(html)
             index.append((anchor, lid, ltitle))
@@ -381,11 +398,9 @@ def build_lab(mod):
         '<section class="module %s" id="mod%d">'
         '<div class="mod-head"><span class="mod-chip">LAB TRACK</span>'
         '<h2 class="mod-title">%s</h2><p class="mod-lede">%s</p>'
-        '<p class="mod-src">사용 도구: <a href="https://github.com/NousResearch/hermes-agent" '
-        'target="_blank" rel="noopener">Hermes Agent</a> (Nous Research, 오픈소스) '
-        '— 아래 모든 명령과 기대 결과는 Hermes 0.20.0 · qwen3.8:27b 환경에서 실제로 실행해 확인한 것이다.</p>'
+        '<p class="mod-src">%s</p>'
         '</div>%s<hr class="mod-end"></section>'
-        % (mod["cls"], mod["n"], esc(title), esc(mod["lede"]), body))
+        % (mod["cls"], mod["n"], esc(title), esc(mod["lede"]), mod["tool"], body))
     return head, toc, title, index
 
 
@@ -402,15 +417,18 @@ def main():
         cards.append('<a class="card %s" href="#mod%d"><span class="mod-no">MODULE %d</span>'
                      '<h3>%s</h3><p>%s</p></a>'
                      % (mod["cls"], mod["n"], mod["n"], esc(mod["short"]), esc(mod["lede"])))
-    lab_html, lab_toc, lab_title, lab_index = build_lab(LAB)
-    links = "".join('<li><a href="#%s">%s</a></li>' % (i, esc(t)) for i, t in lab_toc)
-    tocs.append('<div class="toc-mod %s"><a class="toc-mod-title" href="#mod%d">'
-                '<span class="dot"></span>%s</a><ol>%s</ol></div>'
-                % (LAB["cls"], LAB["n"], esc(LAB["short"]), links))
-    cards.append('<a class="card %s" href="#mod%d"><span class="mod-no">LAB TRACK · 실습 %d개</span>'
-                 '<h3>%s</h3><p>%s</p></a>'
-                 % (LAB["cls"], LAB["n"], len(lab_index), esc(LAB["short"]), esc(LAB["lede"])))
-    tpl = tpl.replace("<!-- LAB -->", lab_html)
+    for lab, slot in zip(LABS, ("<!-- LAB -->", "<!-- LABCC -->")):
+        lab_html, lab_toc, lab_title, lab_index = build_lab(lab)
+        links = "".join('<li><a href="#%s">%s</a></li>' % (i, esc(t)) for i, t in lab_toc)
+        tocs.append('<div class="toc-mod %s"><a class="toc-mod-title" href="#mod%d">'
+                    '<span class="dot"></span>%s</a><ol>%s</ol></div>'
+                    % (lab["cls"], lab["n"], esc(lab["short"]), links))
+        cards.append('<a class="card %s" href="#mod%d">'
+                     '<span class="mod-no">LAB TRACK · 실습 %d개</span>'
+                     '<h3>%s</h3><p>%s</p></a>'
+                     % (lab["cls"], lab["n"], len(lab_index),
+                        esc(lab["short"]), esc(lab["lede"])))
+        tpl = tpl.replace(slot, lab_html)
 
     tpl = tpl.replace("<!-- TOC-PLACEHOLDER -->", "".join(tocs))
     tpl = tpl.replace("<!-- MAP-PLACEHOLDER -->", "".join(cards))

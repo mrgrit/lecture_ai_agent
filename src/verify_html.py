@@ -13,7 +13,8 @@ def bad(m):
     print("FAIL " + m)
 
 
-for ph in ("@@QUIZ@@", "@@EX@@", "@@INDEX@@", "PLACEHOLDER", "<!-- MODULE-", "<!-- LAB -->"):
+for ph in ("@@QUIZ@@", "@@EX@@", "@@INDEX@@", "PLACEHOLDER", "<!-- MODULE-",
+           "<!-- LAB -->", "<!-- LABCC -->"):
     if ph in html:
         bad("leftover placeholder: %s" % ph)
 
@@ -22,9 +23,13 @@ for href in sorted(set(re.findall(r'href="#([^"]+)"', html))):
     if href not in ids:
         bad("dangling anchor #%s" % href)
 
-labs = re.findall(r'<section class="lab" id="(lab-l\d-\d+)"', html)
-if len(labs) != 23:
-    bad("expected 23 lab cards, found %d" % len(labs))
+labs = re.findall(r'<section class="lab" id="(lab-[lc]\d-\d+)"', html)
+if len(labs) != 46:
+    bad("expected 46 lab cards, found %d" % len(labs))
+for pre, n in (("l", 23), ("c", 23)):
+    k = len([x for x in labs if x.startswith("lab-" + pre)])
+    if k != n:
+        bad("track %s: expected %d labs, found %d" % (pre.upper(), n, k))
 if len(labs) != len(set(labs)):
     bad("duplicate lab ids")
 
@@ -44,7 +49,9 @@ for tok in sorted(set(re.findall(r"var\((--[\w-]+)", css))):
 for u in sorted(set(re.findall(r'(?:src|href)="(https?://[^"]+)"', html))):
     if not u.startswith(("https://agentfactory.panaversity.org",
                          "https://github.com/NousResearch",
-                         "https://hermes-agent.nousresearch.com")):
+                         "https://hermes-agent.nousresearch.com",
+                         "https://claude.com/claude-code",
+                         "https://claude.ai/install.sh")):
         bad("unexpected external reference: %s" % u)
 if re.search(r'<(script|link)[^>]+(src|href)="https?://', html):
     bad("external asset reference (CSP unsafe)")
