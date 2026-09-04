@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Static checks: XML well-formedness, CSS class/token coverage, viewBox bounds, text collisions."""
 import re, sys, xml.etree.ElementTree as ET
-import dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab, dia_labcc
+import dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab, dia_labcc, dia_labsteps
 
 DIA = {}
-for m in (dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab, dia_labcc):
+for m in (dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab, dia_labcc, dia_labsteps):
     DIA.update(m.D)
 
 css = open("template.html", encoding="utf-8").read()

@@ -2,10 +2,10 @@
 """Assemble the four Korean course modules into one static HTML page."""
 import re
 import html as H
-import dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab, dia_labcc
+import dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab, dia_labcc, dia_labsteps
 
 DIA = {}
-for m in (dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab, dia_labcc):
+for m in (dia_m1, dia_m2, dia_m3, dia_m4, dia_m5, dia_lab, dia_labcc, dia_labsteps):
     DIA.update(m.D)
 
 MODS = [
@@ -37,18 +37,25 @@ MODS = [
 ]
 
 LABS = [
-    dict(n=6, cls="m6", file="modules/lab-hermes.md", pre="L",
+    dict(n=6, cls="m6", file="modules/lab-hermes.md", pre="L", tab="Hermes로 →",
          short="실습편 · Hermes",
          lede="설치부터 근거 검증기까지, 스물세 개의 실습으로 다섯 모듈을 손으로 확인한다. 학교 GPU 서버의 로컬 모델을 쓰므로 학생 부담이 없다.",
          tool='사용 도구: <a href="https://github.com/NousResearch/hermes-agent" '
               'target="_blank" rel="noopener">Hermes Agent</a> (Nous Research, 오픈소스) '
               '— 아래 모든 명령과 기대 결과는 Hermes 0.20.0 · qwen3.8:27b 환경에서 실제로 실행해 확인한 것이다.'),
-    dict(n=7, cls="m7", file="modules/lab-claude-code.md", pre="C",
+    dict(n=7, cls="m7", file="modules/lab-claude-code.md", pre="C", tab="Claude Code로 →",
          short="실습편 · Claude Code",
          lede="같은 스물세 개를 Claude Code로 한 번 더. 번호까지 일대일로 맞췄으므로 두 트랙을 나란히 비교할 수 있다.",
          tool='사용 도구: <a href="https://claude.com/claude-code" '
               'target="_blank" rel="noopener">Claude Code</a> (Anthropic) '
               '— 아래 모든 명령과 기대 결과는 Claude Code 2.1.259 · claude-haiku-4-5 환경에서 실제로 실행해 확인한 것이다.'),
+    dict(n=8, cls="m8", file="modules/lab-cc-steps.md", pre="S", brief=True,
+         tab="같은 것을 한 줄씩 →",
+         short="실습편 · 한 줄씩",
+         lede="같은 스물세 개를 명령 한 줄씩. 읽어야 할 파이썬 코드가 없고, 판정은 전부 grep 한 줄이 한다. 수업에서 따라 하기 위한 트랙이다.",
+         tool='사용 도구: <a href="https://claude.com/claude-code" '
+              'target="_blank" rel="noopener">Claude Code</a> (Anthropic) '
+              '— 실습편 C 와 같은 스물세 개를 약 200단계로 쪼갠 것이다. 작업 폴더는 <code>~/cc-step</code> 으로 C 트랙과 겹치지 않는다.'),
 ]
 
 # 각 모듈 상단 배너에 걸 실습 링크 (모듈 번호 → [(lab id, 라벨), ...])
@@ -102,8 +109,10 @@ def inline(s):
         if c == "[":
             m = re.match(r"\[([^\]]+)\]\(([^)]+)\)", s[i:])
             if m:
-                out.append('<a href="%s" target="_blank" rel="noopener">%s</a>'
-                           % (H.escape(m.group(2), quote=True), inline(m.group(1))))
+                href = m.group(2)
+                tgt = "" if href.startswith("#") else ' target="_blank" rel="noopener"'
+                out.append('<a href="%s"%s>%s</a>'
+                           % (H.escape(href, quote=True), tgt, inline(m.group(1))))
                 i += m.end()
                 continue
         out.append(esc(c))
@@ -142,7 +151,17 @@ def render_table(rows):
 
 
 def split_row(line):
-    return [c.strip() for c in line.strip().strip("|").split("|")]
+    """표 한 줄 → 셀 목록. `\\|` 는 셀 구분이 아니라 문자 그대로의 | 다."""
+    s = line.strip().strip("|")
+    cells, buf, i = [], [], 0
+    while i < len(s):
+        if s[i] == "\\" and i + 1 < len(s) and s[i + 1] == "|":
+            buf.append("|"); i += 2; continue
+        if s[i] == "|":
+            cells.append("".join(buf).strip()); buf = []; i += 1; continue
+        buf.append(s[i]); i += 1
+    cells.append("".join(buf).strip())
+    return cells
 
 
 def convert(md, mod, sub_tag="h4"):
@@ -305,10 +324,14 @@ def build_module(mod):
         rows = []
         for lab in LABS:
             pre = lab["pre"]
-            links = "".join('<a href="#lab-%s%s">%s%s %s</a>'
-                            % (pre.lower(), i, pre, i, esc(t)) for i, t in labs)
-            rows.append('<p class="mod-labs %s"><span class="t">%s로 →</span>%s</p>'
-                        % (lab["cls"], esc(lab["short"].split(" · ")[-1]), links))
+            if lab.get("brief"):
+                links = "".join('<a href="#lab-%s%s">%s%s</a>'
+                                % (pre.lower(), i, pre, i) for i, t in labs)
+            else:
+                links = "".join('<a href="#lab-%s%s">%s%s %s</a>'
+                                % (pre.lower(), i, pre, i, esc(t)) for i, t in labs)
+            rows.append('<p class="mod-labs %s"><span class="t">%s</span>%s</p>'
+                        % (lab["cls"], esc(lab["tab"]), links))
         lab_html = "".join(rows)
 
     head = (
@@ -330,7 +353,7 @@ META_ICONS = {"대응": "대응", "소요": "소요", "선행": "선행", "확�
 
 def lab_card(head_line, body_md, mod):
     """One `## Lx-y. 제목` block → a lab card."""
-    m = re.match(r"^([LC]\d-\d+)\.\s*(.+)$", head_line)
+    m = re.match(r"^([LCS]\d-\d+)\.\s*(.+)$", head_line)
     lid, title = m.group(1), m.group(2)
     anchor = "lab-" + lid.lower()
 
@@ -374,7 +397,7 @@ def build_lab(mod):
     for part in parts:
         head_line, _, rest = part.partition("\n")
         head_line = head_line.strip()
-        if re.match(r"^[LC]\d-\d+\.", head_line):
+        if re.match(r"^[LCS]\d-\d+\.", head_line):
             html, anchor, lid, ltitle = lab_card(head_line, rest, mod)
             out.append(html)
             index.append((anchor, lid, ltitle))
@@ -417,7 +440,7 @@ def main():
         cards.append('<a class="card %s" href="#mod%d"><span class="mod-no">MODULE %d</span>'
                      '<h3>%s</h3><p>%s</p></a>'
                      % (mod["cls"], mod["n"], mod["n"], esc(mod["short"]), esc(mod["lede"])))
-    for lab, slot in zip(LABS, ("<!-- LAB -->", "<!-- LABCC -->")):
+    for lab, slot in zip(LABS, ("<!-- LAB -->", "<!-- LABCC -->", "<!-- LABSTEP -->")):
         lab_html, lab_toc, lab_title, lab_index = build_lab(lab)
         links = "".join('<li><a href="#%s">%s</a></li>' % (i, esc(t)) for i, t in lab_toc)
         tocs.append('<div class="toc-mod %s"><a class="toc-mod-title" href="#mod%d">'

@@ -14,7 +14,7 @@ def bad(m):
 
 
 for ph in ("@@QUIZ@@", "@@EX@@", "@@INDEX@@", "PLACEHOLDER", "<!-- MODULE-",
-           "<!-- LAB -->", "<!-- LABCC -->"):
+           "<!-- LAB -->", "<!-- LABCC -->", "<!-- LABSTEP -->"):
     if ph in html:
         bad("leftover placeholder: %s" % ph)
 
@@ -23,10 +23,10 @@ for href in sorted(set(re.findall(r'href="#([^"]+)"', html))):
     if href not in ids:
         bad("dangling anchor #%s" % href)
 
-labs = re.findall(r'<section class="lab" id="(lab-[lc]\d-\d+)"', html)
-if len(labs) != 46:
-    bad("expected 46 lab cards, found %d" % len(labs))
-for pre, n in (("l", 23), ("c", 23)):
+labs = re.findall(r'<section class="lab" id="(lab-[lcs]\d-\d+)"', html)
+if len(labs) != 69:
+    bad("expected 69 lab cards, found %d" % len(labs))
+for pre, n in (("l", 23), ("c", 23), ("s", 23)):
     k = len([x for x in labs if x.startswith("lab-" + pre)])
     if k != n:
         bad("track %s: expected %d labs, found %d" % (pre.upper(), n, k))

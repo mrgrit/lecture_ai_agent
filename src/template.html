@@ -16,6 +16,7 @@
     --m5: #1F6F8B;  --m5-soft: #E1EEF3;
     --m6: #A83A5C;  --m6-soft: #FAE6EC;
     --m7: #7A4BA8;  --m7-soft: #F0E9F8;
+    --m8: #1D6F6B;  --m8-soft: #E2F1F0;
     --code-bg: #F0F2F6;
     --line-strong: #B9C2D0;
     --on-accent: #FFFFFF;
@@ -42,6 +43,7 @@
       --m5: #6FB8D4;  --m5-soft: #16303A;
       --m6: #E88AA6;  --m6-soft: #3A1E28;
       --m7: #BCA0E0;  --m7-soft: #2A1E3A;
+      --m8: #79C9C3;  --m8-soft: #16302F;
       --code-bg: #10131A;
       --line-strong: #3C4557;
       --on-accent: #10131A;
@@ -68,6 +70,7 @@
     --m5: #6FB8D4;  --m5-soft: #16303A;
     --m6: #E88AA6;  --m6-soft: #3A1E28;
     --m7: #BCA0E0;  --m7-soft: #2A1E3A;
+    --m8: #79C9C3;  --m8-soft: #16302F;
     --code-bg: #10131A;
     --line-strong: #3C4557;
     --on-accent: #10131A;
@@ -163,9 +166,9 @@
     border-top: 4px solid var(--mc, var(--accent));
   }
   .map a.card:hover { border-color: var(--mc, var(--accent)); }
-  .map a.card.m6, .map a.card.m7 { grid-column: span 2; }  /* 두 실습편은 넓게 */
+  .map a.card.m6, .map a.card.m7, .map a.card.m8 { grid-column: span 2; }  /* 실습편 셋은 넓게 */
   @media (max-width: 700px) {
-    .map a.card.m6, .map a.card.m7 { grid-column: 1 / -1; }
+    .map a.card.m6, .map a.card.m7, .map a.card.m8 { grid-column: 1 / -1; }
   }
   .map .mod-no { font-size: 12px; letter-spacing: .14em; font-weight: 700; color: var(--mc); }
   .map h3 { margin: 6px 0 8px; font-size: 17.5px; line-height: 1.35; }
@@ -211,8 +214,10 @@
   .callout .t { font-weight: 700; color: var(--mc); margin-right: 6px; }
   code {
     background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px;
-    padding: 1.5px 6px; font-size: 13.5px;
+    padding: 1.5px 6px; font-size: 13.5px; overflow-wrap: anywhere;
   }
+  pre code { overflow-wrap: normal; }
+  .quiz summary > * { min-width: 0; }
   pre {
     background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
     padding: 14px 18px; overflow-x: auto; margin: 16px 0; line-height: 1.6;
@@ -394,6 +399,7 @@
   .m5 { --mc: var(--m5); --mc-soft: var(--m5-soft); }
   .m6 { --mc: var(--m6); --mc-soft: var(--m6-soft); }
   .m7 { --mc: var(--m7); --mc-soft: var(--m7-soft); }
+  .m8 { --mc: var(--m8); --mc-soft: var(--m8-soft); }
 
   a:focus-visible, summary:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px;
@@ -456,6 +462,7 @@
       <!-- MODULE-5 -->
       <!-- LAB -->
       <!-- LABCC -->
+      <!-- LABSTEP -->
     </main>
   </div>
 </div>
