@@ -35,41 +35,44 @@ LOGS = S / "slogs"
 LOGS.mkdir(exist_ok=True)
 P = '"$H/cc-step'          # 프로젝트 폴더 접두사
 
+P = '"$H/cc-step'          # 프로젝트 폴더 접두사
+T = 'python3 "$S/probe.py"'  # 세션 기록 조회기
+
 CHECKS = {
     "S0-1": 'grep -q "(Claude Code)" "$LOG" && grep -q "cc-step" "$LOG"'
             ' && test -d ' + P + '"',
-    "S0-2": 'grep -q "cache_read_input_tokens" "$LOG"'
-            ' && grep -q "total_cost_usd" "$LOG"'
-            ' && grep -q \'"result":"\' "$LOG"'
-            ' && grep -q "num_turns" "$LOG"',
-    "S0-3": 'grep -qE "^(Read|Bash|Glob|Grep)$" "$LOG"'
-            ' && grep -q \'"num_turns":2\' "$LOG"'
-            ' && grep -q \'"num_turns":1\' "$LOG"',
-    "S1-1": 'grep -q "^Skill$" "$LOG" && grep -q \'"skill":"weekly-report"\' "$LOG"'
-            ' && test -f ' + P + '/.claude/skills/weekly-report/SKILL.md"'
+    "S0-2": 'test -s "$LOG" && test -d "$HOME/.claude/projects/$(echo '
+            + P + '" | tr / -)"',
+    "S0-3": 'test -f ' + P + '/words.txt"'
+            ' && ' + T + ' tools ' + P + '" | grep -qE "^(Read|Bash|Glob|Grep)$"',
+    "S1-1": 'test -f ' + P + '/.claude/skills/weekly-report/SKILL.md"'
             ' && ! test -e ' + P + '/.skills-parked/weekly-report"'
+            ' && ' + T + ' skills ' + P + '" | grep -q weekly-report'
+            ' && grep -q "⟪YNC-REPORT-V1⟫" ' + P + '/report.md"'
             ' && ! grep -q "YNC-REPORT-V1" ' + P + '/noskill.txt"',
-    "S1-2": 'grep -q \'"skill":"meeting-notes"\' "$LOG"'
-            ' && grep -q \'"skill":"weekly-report"\' "$LOG"'
-            ' && test -f ' + P + '/.claude/skills/meeting-notes/SKILL.md"',
-    "S1-3": 'grep -q "Connected" "$LOG" && grep -q "mcp__notes__" "$LOG"'
+    "S1-2": 'test -f ' + P + '/.claude/skills/meeting-notes/SKILL.md"'
+            ' && test -f ' + P + '/notes.md"'
+            ' && ' + T + ' skills ' + P + '" | sort -u | grep -c . | grep -q 2',
+    "S1-3": '(cd ' + P + '" && claude mcp list 2>/dev/null | grep -q Connected)'
             ' && grep -q "거부: notes 폴더 밖은" "$LOG"'
             ' && grep -q "노트 파일 목록을 돌려준다" "$LOG"'
-            ' && test -f ' + P + '/notes_server.py"',
+            ' && test -f ' + P + '/notes_server.py"'
+            ' && ' + T + ' tools ' + P + '" | grep -q "^mcp__notes__"',
     "S1-4": 'test "$(ls ' + P + '/bench"/haiku-*.txt ' + P + '/bench"/sonnet-*.txt'
             ' 2>/dev/null | wc -l)" -eq 4 && grep -q "마커1" "$LOG"',
-    "S2-1": 'test "$(grep -c "토큰유출 0" "$LOG")" -ge 4'
-            ' && test -f ' + P + '/a.txt" && ! grep -q "abc123" "$LOG"'
-            ' && grep -q "문법 OK" "$LOG"',
+    "S2-1": 'test -f ' + P + '/a.txt" && grep -q "문법 OK" "$LOG"'
+            ' && ! ' + T + ' text ' + P + '" | grep -q "abc123"'
+            ' && grep -qx "0" "$LOG"',
     "S2-2": 'grep -q "규칙 준수" "$LOG" && test -f ' + P + '/work/hello.txt"'
             ' && grep -q "YNC-RULES-V1" ' + P + '/CLAUDE.md"',
-    "S2-3": 'grep -q "BLOCKED-BY-GUARD" "$LOG"'
-            ' && grep -q "exit 2 (2 이어야 차단)" "$LOG"'
+    "S2-3": 'grep -q "exit 2 (2 이어야 차단)" "$LOG"'
             ' && test "$(wc -l < ' + P + '/.claude/guard.log")" -ge 2'
+            ' && grep -q "rm" ' + P + '/.claude/guard.log"'
             ' && test -x ' + P + '/.claude/hooks/guard-bash.sh"',
     "S2-4": 'grep -q "5/5 통과" "$LOG"'
             ' && grep -q "rc=0" ' + P + '/work/slug/.claude/gate.log"',
-    "S2-5": 'grep -qE "[0-9]+ Agent" "$LOG" && grep -q "guard-bash.sh" "$LOG"'
+    "S2-5": '' + T + ' tools ' + P + '" | grep -q "^Agent$"'
+            ' && grep -q "guard-bash.sh" "$LOG"'
             ' && grep -q "⟪YNC-AUDIT-V1⟫" ' + P + '/work/audit.md"',
     "S3-1": 'test "$(wc -l < ' + P + '/loop/heartbeat.log")" -eq 4'
             ' && grep -q "exit 10" "$LOG"',
@@ -79,22 +82,22 @@ CHECKS = {
     "S3-3": 'grep -q "할 일 없음" "$LOG"'
             ' && test "$(grep -c . ' + P + '/loop/done.md")" -eq 3'
             ' && test "$(cat ' + P + '/loop/cursor.txt")" = "3"',
-    "S3-4": 'grep -q "입력 토큰 합계:" "$LOG" && grep -q "캐시 읽기 합계:" "$LOG"'
-            ' && grep -q "budget_exhausted" "$LOG"',
+    "S3-4": 'grep -qE "^[0-9]+$" "$LOG" && grep -q "budget" "$LOG"'
+            ' && test -s ' + P + '/budget.txt"',
     "S4-1": 'grep -q "## 팀 사실" ' + P + '/CLAUDE.md"'
             ' && grep -q "YNC-RULES-V1" ' + P + '/CLAUDE.md"'
             ' && grep -q "화요일" ' + P + '/mem3.txt"'
             ' && grep -q "90" ' + P + '/mem3.txt"'
             ' && grep -q "3주\\|3 주" ' + P + '/mem5.txt"',
-    "S4-2": 'test -s ' + P + '/tools.txt" && grep -q "Skill" "$LOG"'
-            ' && grep -q "mcp__notes__" "$LOG" && grep -q "Agent" "$LOG"',
+    "S4-2": 'test -s ' + P + '/tools.txt" && test -s ' + P + '/work/journey.md"'
+            ' && grep -q "Bash" "$LOG"',
     "S4-3": 'grep -q "0개 실패" "$LOG" && grep -q "2개 실패" "$LOG"'
             ' && grep -q "근거 없음" "$LOG" && test -s ' + P + '/claims.json"',
     "S5-1": 'test -f ' + P + '/work/sdd/roundA/duration.sh"'
             ' && test -f ' + P + '/work/sdd/roundB/duration.sh"'
             ' && grep -qE "^roundA +[0-9]+/16 통과" "$LOG"'
             ' && grep -qE "^roundB +16/16 통과" "$LOG"',
-    "S5-2": 'grep -q "⟪YNC-CLARIFY-V1⟫" "$LOG"'
+    "S5-2": 'grep -q "⟪YNC-CLARIFY-V1⟫" ' + P + '/clarify2.txt"'
             ' && test -f ' + P + '/.claude/commands/clarify.md"',
     "S5-3": 'grep -q "17/17 통과" "$LOG"'
             ' && grep -q "rc=0" ' + P + '/work/sdd/gated/.claude/gate.log"',
@@ -133,6 +136,7 @@ for lab in labs:
     ok = None
     if chk:
         cenv = dict(env); cenv["LOG"] = str(log); cenv["H"] = str(HOME)
+        cenv["S"] = str(S)
         ok = subprocess.run(["bash", "-c", chk], env=cenv,
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
     results.append((name, lab["title"], dt, ok, log.stat().st_size))

@@ -184,12 +184,21 @@ def convert(md, mod, sub_tag="h4"):
             continue
         # fenced code
         if ln.startswith("```"):
+            info = ln[3:].strip().split(" ")[0]
             j = i + 1
             buf = []
             while j < n and not lines[j].startswith("```"):
                 buf.append(lines[j])
                 j += 1
-            out.append("<pre><code>%s</code></pre>" % H.escape("\n".join(buf)))
+            body = H.escape("\n".join(buf))
+            if info == "prompt":
+                out.append('<div class="promptbox"><span class="pb-t">'
+                           '클로드코드 창에 칠 말</span><pre><code>%s</code></pre></div>' % body)
+            elif info == "screen":
+                out.append('<div class="screenbox"><span class="pb-t">'
+                           '화면에 나오는 것</span><pre><code>%s</code></pre></div>' % body)
+            else:
+                out.append("<pre><code>%s</code></pre>" % body)
             i = j + 1
             continue
         # headings

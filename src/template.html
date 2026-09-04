@@ -223,6 +223,19 @@
     padding: 14px 18px; overflow-x: auto; margin: 16px 0; line-height: 1.6;
   }
   pre code { background: none; border: none; padding: 0; font-size: 13px; }
+  .promptbox, .screenbox {
+    margin: 16px 0; border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--mc, var(--line)); background: var(--mc-soft, var(--surface-2));
+  }
+  .screenbox { border-color: var(--line-strong); background: var(--surface-2); }
+  .promptbox .pb-t, .screenbox .pb-t {
+    display: block; padding: 6px 14px; font-size: 11.5px; font-weight: 700;
+    letter-spacing: .04em; color: var(--mc); background: transparent;
+    border-bottom: 1px solid var(--line);
+  }
+  .screenbox .pb-t { color: var(--muted); }
+  .promptbox pre, .screenbox pre { margin: 0; border: none; border-radius: 0; background: transparent; }
+  .promptbox pre code { font-size: 13.5px; }
 
   /* tables */
   .tbl-wrap { overflow-x: auto; margin: 16px 0; }
